@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    Claims Management – Stylesheet
+   CS Corporate Design Colors applied
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
@@ -7,21 +8,41 @@
   font-family: "Segoe UI", -apple-system, BlinkMacSystemFont,
                "Helvetica Neue", Arial, sans-serif;
 
-  --brand:          #2563eb;
-  --brand-dark:     #1d4ed8;
-  --brand-light:    #eff6ff;
-  --surface:        #ffffff;
-  --surface-muted:  #f8fafc;
-  --border:         #e2e8f0;
-  --border-strong:  #cbd5e1;
-  --text:           #0f172a;
-  --text-muted:     #64748b;
-  --text-subtle:    #94a3b8;
-  --success:        #16a34a;
-  --success-bg:     #f0fdf4;
-  --ai-accent:      #7c3aed;
-  --ai-accent-light:#f5f3ff;
-  --ai-border:      #ddd6fe;
+  /* CS Brand Color Palette */
+  --cs-white:      #FFFFFF;
+  --cs-azure:      #008CAA;
+  --cs-azure-dark: #007392;
+  --cs-sky:        #DAF5F9;
+  --cs-sky-light:  #BCECF4;
+  --cs-lime:       #95F483;
+  --cs-marine:     #00495D;
+  --cs-sand:       #F6F4F1;
+  --cs-sand-dark:  #C0BDB7;
+  --cs-sand-light: #EBE7E0;
+  --cs-palmtree:   #00806F;
+  --cs-coral:      #E85D6E;
+  --cs-coral-light:#FCE8EA;
+  --cs-text:       #000000;
+  --cs-marine-light: #B9CDD3;
+  --cs-marine-dark:  #003347;
+  --cs-gray-light: #E8EEF0;
+
+  /* Semantic mappings */
+  --brand:          var(--cs-azure);
+  --brand-dark:     var(--cs-azure-dark);
+  --brand-light:    var(--cs-sky);
+  --surface:        var(--cs-white);
+  --surface-muted:  var(--cs-sand);
+  --border:         var(--cs-sand-light);
+  --border-strong:  var(--cs-sand-dark);
+  --text:           var(--cs-text);
+  --text-muted:     var(--cs-marine);
+  --text-subtle:    var(--cs-marine-light);
+  --success:        var(--cs-palmtree);
+  --success-bg:     var(--cs-sky);
+  --ai-accent:      var(--cs-azure);
+  --ai-accent-light:var(--cs-sky);
+  --ai-border:      var(--cs-sky-light);
 
   --navbar-h:    52px;
   --claimbar-h:  48px;
@@ -31,7 +52,7 @@
 
 body {
   margin: 0;
-  background: #f1f5f9;
+  background: var(--cs-gray-light);
   color: var(--text);
   font-size: 0.9375rem;
 }
@@ -60,10 +81,12 @@ h1, h2, h3 { margin: 0; }
   flex-shrink: 0;
 }
 
-.brand-icon {
-  width: 22px;
-  height: 22px;
-  stroke: #fff;
+/* ── Brand logo image ────────────────────────────────────────── */
+.brand-logo {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .brand-name {
@@ -278,8 +301,8 @@ h1, h2, h3 { margin: 0; }
 }
 
 .status-active {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--cs-sky);
+  color: var(--cs-marine);
 }
 
 .status-completed {
@@ -415,8 +438,8 @@ h1, h2, h3 { margin: 0; }
 }
 
 .file-remove-btn:hover {
-  color: #dc2626;
-  background: #fee2e2;
+  color: var(--cs-coral);
+  background: var(--cs-coral-light);
 }
 
 /* ── Step Navigation Tabs ────────────────────────────────────── */
@@ -794,13 +817,13 @@ h1, h2, h3 { margin: 0; }
 }
 
 .ai-run-btn {
-  background: var(--ai-accent);
-  border-color: #6d28d9;
+  background: var(--cs-marine);
+  border-color: var(--cs-marine);
   width: 100%;
   justify-content: center;
 }
 
-.ai-run-btn:hover:not(:disabled) { background: #6d28d9; }
+.ai-run-btn:hover:not(:disabled) { background: var(--cs-marine-dark); border-color: var(--cs-marine-dark); }
 
 /* AI result */
 .ai-result-wrap { display: grid; gap: 0.4rem; }
@@ -820,8 +843,8 @@ h1, h2, h3 { margin: 0; }
 }
 
 .ai-result {
-  background: #0d1117;
-  color: #c9d1d9;
+  background: var(--cs-marine);
+  color: var(--cs-sky);
   border-radius: 0.4rem;
   padding: 0.75rem;
   font-size: 0.82rem;
