@@ -120,10 +120,74 @@ const processSteps = [
 const aiModelTemperature = 0.2;
 
 const processStepsContainer = document.getElementById("process-steps");
+const detailStepper = document.getElementById("detail-stepper");
+const detailForm = document.getElementById("detail-form");
+const detailStepTitle = document.getElementById("detail-step-title");
+const detailStepStatus = document.getElementById("detail-step-status");
+const detailPrevButton = document.getElementById("detail-prev");
+const detailNextButton = document.getElementById("detail-next");
 const aiConfigForm = document.getElementById("ai-config-form");
 const aiStepSelect = document.getElementById("ai-step-select");
 const aiOutput = document.getElementById("ai-output");
 const aiRunButton = document.getElementById("ai-run");
+const detailFieldConfig = {
+  claimpruefung: [
+    { name: "eingangDatum", label: "Eingangsdatum", type: "date", required: true },
+    { name: "claimReferenz", label: "Claim-Referenz", type: "text", required: true },
+    { name: "anzeigeGeprueft", label: "Anzeigen vollständig geprüft", type: "checkbox", required: true, fullWidth: true },
+    { name: "formalKommentar", label: "Kommentar zur formalen Prüfung", type: "textarea", required: true, fullWidth: true, rows: 3 },
+  ],
+  "fachtechnische-pruefung": [
+    { name: "fachbereich", label: "Fachbereich", type: "text", required: true },
+    { name: "leistungsbeschreibung", label: "Leistungsbeschreibung plausibel", type: "select", required: true, options: ["Ja", "Teilweise", "Nein"] },
+    { name: "alternativen", label: "Alternative Lösungen", type: "textarea", required: true, fullWidth: true, rows: 3 },
+    { name: "technischerKommentar", label: "Technischer Kommentar", type: "textarea", required: true, fullWidth: true, rows: 3 },
+  ],
+  kostenverfolgung: [
+    { name: "budgetTopf", label: "Budgetquelle", type: "select", required: true, options: ["Projektbudget", "Contingency", "Risikobudget"] },
+    { name: "geschaetzteKosten", label: "Geschätzte Mehrkosten (EUR)", type: "number", required: true },
+    { name: "budgetantrag", label: "Budgetantrag erforderlich", type: "checkbox", fullWidth: true },
+    { name: "kostenkommentar", label: "Kommentar zur Kostenverfolgung", type: "textarea", required: true, fullWidth: true, rows: 3 },
+  ],
+  "pruefung-dem-grunde": [
+    { name: "anspruch", label: "Vergütungsanspruch dem Grunde nach", type: "select", required: true, options: ["Bestätigt", "Teilweise", "Abgelehnt"] },
+    { name: "vertragsklausel", label: "Relevante Vertragsklausel", type: "text", required: true },
+    { name: "rechtlicherHinweis", label: "Rechtlicher Hinweis", type: "textarea", required: true, fullWidth: true, rows: 3 },
+  ],
+  "terminliche-pruefung": [
+    { name: "betroffenerMeilenstein", label: "Betroffener Meilenstein", type: "text", required: true },
+    { name: "terminverschiebung", label: "Verschiebung in Tagen", type: "number", required: true },
+    { name: "kritischerPfad", label: "Kritischer Pfad betroffen", type: "checkbox", fullWidth: true },
+    { name: "terminKommentar", label: "Kommentar zur Terminprüfung", type: "textarea", required: true, fullWidth: true, rows: 3 },
+  ],
+  "pruefung-hoehe": [
+    { name: "bewertungsmethode", label: "Bewertungsmethode", type: "select", required: true, options: ["Vorkalkulatorisch", "Tatsächliche Kosten", "Marktüblich"] },
+    { name: "empfohlenerBetrag", label: "Empfohlener Betrag (EUR)", type: "number", required: true },
+    { name: "agkBewertet", label: "AGK-Zuschläge berücksichtigt", type: "checkbox", fullWidth: true },
+    { name: "handlungsempfehlung", label: "Handlungsempfehlung", type: "textarea", required: true, fullWidth: true, rows: 3 },
+  ],
+  risikoangaben: [
+    { name: "risikoId", label: "Risikoregister-ID", type: "text", required: true },
+    { name: "eintritt", label: "Eintrittswahrscheinlichkeit", type: "select", required: true, options: ["Niedrig", "Mittel", "Hoch"] },
+    { name: "auswirkung", label: "Auswirkung", type: "select", required: true, options: ["Niedrig", "Mittel", "Hoch"] },
+    { name: "massnahme", label: "Maßnahme", type: "textarea", required: true, fullWidth: true, rows: 3 },
+  ],
+  verhandlung: [
+    { name: "verhandlungstermin", label: "Verhandlungstermin", type: "date", required: true },
+    { name: "strategie", label: "Verhandlungsstrategie", type: "textarea", required: true, fullWidth: true, rows: 3 },
+    { name: "verhandlungsziele", label: "Verhandlungsziele", type: "textarea", required: true, fullWidth: true, rows: 3 },
+  ],
+  "annahme-ablehnung": [
+    { name: "entscheidung", label: "Entscheidung", type: "select", required: true, options: ["Annahme", "Teilannahme", "Ablehnung"] },
+    { name: "freigabeDatum", label: "Freigabedatum", type: "date", required: true },
+    { name: "schreibenVersendet", label: "Schreiben versendet", type: "checkbox", required: true, fullWidth: true },
+    { name: "abschlussnotiz", label: "Abschlussnotiz", type: "textarea", required: true, fullWidth: true, rows: 3 },
+  ],
+};
+let currentDetailStepIndex = 0;
+let highestUnlockedDetailStepIndex = 0;
+const completedDetailSteps = new Set();
+const detailValuesByStepId = {};
 
 function createList(items) {
   const list = document.createElement("ul");
@@ -186,6 +250,174 @@ function renderProcessSteps() {
     option.textContent = step.title;
     aiStepSelect.appendChild(option);
   });
+}
+
+function getDetailFields(stepId) {
+  return detailFieldConfig[stepId] || [];
+}
+
+function saveFieldValue(stepId, fieldName, value) {
+  if (!detailValuesByStepId[stepId]) {
+    detailValuesByStepId[stepId] = {};
+  }
+  detailValuesByStepId[stepId][fieldName] = value;
+}
+
+function getFieldValue(stepId, fieldName, fallbackValue = "") {
+  return detailValuesByStepId[stepId]?.[fieldName] ?? fallbackValue;
+}
+
+function createFieldInput(step, field) {
+  if (field.type === "textarea") {
+    const textarea = document.createElement("textarea");
+    textarea.name = field.name;
+    textarea.rows = field.rows || 3;
+    textarea.required = Boolean(field.required);
+    textarea.value = getFieldValue(step.id, field.name, "");
+    textarea.addEventListener("input", () => saveFieldValue(step.id, field.name, textarea.value));
+    return textarea;
+  }
+
+  if (field.type === "select") {
+    const select = document.createElement("select");
+    select.name = field.name;
+    select.required = Boolean(field.required);
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Bitte auswählen";
+    placeholder.disabled = true;
+    placeholder.selected = !getFieldValue(step.id, field.name, "");
+    select.appendChild(placeholder);
+
+    (field.options || []).forEach((optionValue) => {
+      const option = document.createElement("option");
+      option.value = optionValue;
+      option.textContent = optionValue;
+      if (getFieldValue(step.id, field.name, "") === optionValue) {
+        option.selected = true;
+      }
+      select.appendChild(option);
+    });
+
+    select.addEventListener("change", () => saveFieldValue(step.id, field.name, select.value));
+    return select;
+  }
+
+  const input = document.createElement("input");
+  input.type = field.type;
+  input.name = field.name;
+  input.required = Boolean(field.required);
+
+  if (field.type === "checkbox") {
+    input.checked = Boolean(getFieldValue(step.id, field.name, false));
+    input.addEventListener("change", () => saveFieldValue(step.id, field.name, input.checked));
+    return input;
+  }
+
+  input.value = getFieldValue(step.id, field.name, "");
+  input.addEventListener("input", () => saveFieldValue(step.id, field.name, input.value));
+  return input;
+}
+
+function renderDetailStepper() {
+  detailStepper.replaceChildren();
+
+  processSteps.forEach((step, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "detail-step-button";
+    button.disabled = index > highestUnlockedDetailStepIndex;
+    if (index === currentDetailStepIndex) {
+      button.classList.add("current");
+    }
+    if (completedDetailSteps.has(step.id)) {
+      button.classList.add("completed");
+    }
+
+    const title = document.createElement("span");
+    title.textContent = `${index + 1}. ${step.title}`;
+    button.appendChild(title);
+
+    const marker = document.createElement("strong");
+    marker.textContent = completedDetailSteps.has(step.id) ? "✓" : index <= highestUnlockedDetailStepIndex ? "→" : "🔒";
+    button.appendChild(marker);
+
+    button.addEventListener("click", () => {
+      currentDetailStepIndex = index;
+      renderDetailScreen();
+    });
+
+    detailStepper.appendChild(button);
+  });
+}
+
+function renderDetailScreen() {
+  const step = processSteps[currentDetailStepIndex];
+  const fields = getDetailFields(step.id);
+
+  detailStepTitle.textContent = `${currentDetailStepIndex + 1}. ${step.title}`;
+  if (completedDetailSteps.has(step.id)) {
+    detailStepStatus.textContent = "Abgeschlossen";
+    detailStepStatus.className = "detail-status completed";
+  } else {
+    detailStepStatus.textContent = "In Bearbeitung";
+    detailStepStatus.className = "detail-status";
+  }
+
+  detailForm.replaceChildren();
+
+  fields.forEach((field) => {
+    if (field.type === "checkbox") {
+      const checkboxLabel = document.createElement("label");
+      checkboxLabel.className = `detail-checkbox${field.fullWidth ? " full-width" : ""}`;
+      const checkbox = createFieldInput(step, field);
+      checkboxLabel.appendChild(checkbox);
+      checkboxLabel.append(field.label);
+      detailForm.appendChild(checkboxLabel);
+      return;
+    }
+
+    const label = document.createElement("label");
+    if (field.fullWidth) {
+      label.classList.add("full-width");
+    }
+    label.textContent = field.label;
+    label.appendChild(createFieldInput(step, field));
+    detailForm.appendChild(label);
+  });
+
+  detailPrevButton.disabled = currentDetailStepIndex === 0;
+  detailNextButton.textContent =
+    currentDetailStepIndex === processSteps.length - 1
+      ? "Prozess abschließen"
+      : "Schritt abschließen & weiter";
+  renderDetailStepper();
+}
+
+function goToPreviousDetailStep() {
+  if (currentDetailStepIndex === 0) {
+    return;
+  }
+  currentDetailStepIndex -= 1;
+  renderDetailScreen();
+}
+
+function completeAndAdvanceDetailStep() {
+  if (!detailForm.reportValidity()) {
+    return;
+  }
+
+  const currentStep = processSteps[currentDetailStepIndex];
+  completedDetailSteps.add(currentStep.id);
+
+  if (currentDetailStepIndex < processSteps.length - 1) {
+    highestUnlockedDetailStepIndex = Math.max(highestUnlockedDetailStepIndex, currentDetailStepIndex + 1);
+    currentDetailStepIndex += 1;
+    renderDetailScreen();
+    return;
+  }
+
+  renderDetailScreen();
 }
 
 function getSelectedStep() {
@@ -288,4 +520,7 @@ async function runAzureOpenAIDemo(event) {
 }
 
 renderProcessSteps();
+renderDetailScreen();
+detailPrevButton.addEventListener("click", goToPreviousDetailStep);
+detailNextButton.addEventListener("click", completeAndAdvanceDetailStep);
 aiConfigForm.addEventListener("submit", runAzureOpenAIDemo);

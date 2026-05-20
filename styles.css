@@ -1,6 +1,12 @@
 :root {
   color-scheme: light;
-  font-family: Arial, sans-serif;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --fluent-brand: #5b5fc7;
+  --fluent-brand-strong: #4f52b2;
+  --fluent-surface: #ffffff;
+  --fluent-border: #d1d1d1;
+  --fluent-text-muted: #616161;
+  --fluent-success: #107c10;
 }
 
 * {
@@ -9,8 +15,8 @@
 
 body {
   margin: 0;
-  background: #f6f8fa;
-  color: #1f2328;
+  background: #f3f2f1;
+  color: #242424;
 }
 
 .header {
@@ -26,7 +32,7 @@ h3 {
 .subtitle,
 .section-intro,
 .disclaimer {
-  color: #59636e;
+  color: var(--fluent-text-muted);
 }
 
 .layout {
@@ -36,10 +42,11 @@ h3 {
 }
 
 .card {
-  background: #fff;
-  border: 1px solid #d0d7de;
+  background: var(--fluent-surface);
+  border: 1px solid var(--fluent-border);
   border-radius: 0.5rem;
   padding: 1rem;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 6%);
 }
 
 .process-grid {
@@ -50,25 +57,25 @@ h3 {
 }
 
 .process-step {
-  border: 1px solid #d0d7de;
+  border: 1px solid var(--fluent-border);
   border-radius: 0.5rem;
   overflow: hidden;
-  background: #fff;
+  background: var(--fluent-surface);
 }
 
 .step-title {
   margin: 0;
   padding: 0.8rem;
   font-size: 1.1rem;
-  border-bottom: 1px solid #b7bfc8;
+  border-bottom: 1px solid var(--fluent-border);
 }
 
 .step-title.step-core {
-  background: #95e085;
+  background: #c7e0f4;
 }
 
 .step-title.step-check {
-  background: #f8c20a;
+  background: #fde7c2;
 }
 
 .step-content {
@@ -89,9 +96,9 @@ h3 {
 .step-optional {
   margin-left: 0.4rem;
   font-size: 0.78rem;
-  color: #24292f;
-  background: #ffeb80;
-  border: 1px solid #f1cc00;
+  color: #242424;
+  background: #fce100;
+  border: 1px solid #d7b300;
   border-radius: 999px;
   padding: 0.1rem 0.45rem;
   vertical-align: middle;
@@ -114,11 +121,14 @@ h3 {
 .config-grid input,
 .config-grid select,
 .config-grid textarea,
-.config-grid button {
+.config-grid button,
+.detail-form input,
+.detail-form select,
+.detail-form textarea {
   width: 100%;
   font: inherit;
   padding: 0.55rem;
-  border: 1px solid #c8d1dc;
+  border: 1px solid #8a8886;
   border-radius: 0.4rem;
   background: #fff;
 }
@@ -129,10 +139,10 @@ h3 {
 
 #ai-run {
   align-self: end;
-  background: #1f6feb;
+  background: var(--fluent-brand);
   color: #fff;
   cursor: pointer;
-  border: 1px solid #1b63d1;
+  border: 1px solid var(--fluent-brand-strong);
 }
 
 #ai-run:disabled {
@@ -152,4 +162,123 @@ h3 {
   padding: 0.75rem;
   white-space: pre-wrap;
   min-height: 100px;
+}
+
+.detail-stepper {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.detail-step-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border: 1px solid #c8c6c4;
+  background: #fff;
+  border-radius: 0.4rem;
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  font: inherit;
+}
+
+.detail-step-button.current {
+  border-color: var(--fluent-brand);
+  box-shadow: inset 0 0 0 1px var(--fluent-brand);
+}
+
+.detail-step-button.completed {
+  border-color: #92c353;
+  background: #f1faea;
+}
+
+.detail-step-button:disabled {
+  color: #a19f9d;
+  background: #faf9f8;
+}
+
+.detail-screen {
+  margin-top: 1rem;
+  border: 1px solid #e1dfdd;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.detail-screen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.8rem;
+}
+
+.detail-status {
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #edebe9;
+}
+
+.detail-status.completed {
+  background: #dff6dd;
+  color: #0b6a0b;
+}
+
+.detail-form {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.detail-form label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.93rem;
+  font-weight: 600;
+}
+
+.detail-form label.full-width {
+  grid-column: 1 / -1;
+}
+
+.detail-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+  font-weight: 600;
+}
+
+.detail-checkbox.full-width {
+  grid-column: 1 / -1;
+}
+
+.detail-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.primary-button,
+.secondary-button {
+  border-radius: 0.4rem;
+  padding: 0.55rem 0.9rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.primary-button {
+  background: var(--fluent-brand);
+  border: 1px solid var(--fluent-brand-strong);
+  color: #fff;
+}
+
+.secondary-button {
+  background: #fff;
+  border: 1px solid #8a8886;
+  color: #323130;
 }

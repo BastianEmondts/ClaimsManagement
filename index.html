@@ -24,6 +24,34 @@
         <div id="process-steps" class="process-grid" aria-live="polite"></div>
       </section>
 
+      <section class="card" aria-labelledby="detail-title">
+        <h2 id="detail-title">Detail-Screens je Prozess-Schritt</h2>
+        <p class="section-intro">
+          Bearbeite die Prozessschritte nacheinander. Ein Schritt wird erst nach
+          vollständiger Eingabe freigegeben.
+        </p>
+
+        <div id="detail-stepper" class="detail-stepper" aria-live="polite"></div>
+
+        <article class="detail-screen">
+          <header class="detail-screen-header">
+            <h3 id="detail-step-title"></h3>
+            <span id="detail-step-status" class="detail-status"></span>
+          </header>
+
+          <form id="detail-form" class="detail-form"></form>
+
+          <div class="detail-actions">
+            <button id="detail-prev" class="secondary-button" type="button">
+              Zurück
+            </button>
+            <button id="detail-next" class="primary-button" type="button">
+              Schritt abschließen &amp; weiter
+            </button>
+          </div>
+        </article>
+      </section>
+
       <section class="card" aria-labelledby="ai-title">
         <h2 id="ai-title">Azure OpenAI Demo (Frontend-Konfiguration)</h2>
         <p class="section-intro">
