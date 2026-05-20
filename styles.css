@@ -14,33 +14,142 @@ body {
 }
 
 .header {
-  padding: 2rem 1.5rem 1rem;
+  padding: 1.75rem 1.5rem 0.5rem;
 }
 
-h1 {
+h1,
+h2,
+h3 {
   margin: 0;
 }
 
-.subtitle {
-  margin-top: 0.5rem;
+.subtitle,
+.section-intro,
+.disclaimer {
   color: #59636e;
 }
 
-.content {
+.layout {
   display: grid;
   gap: 1rem;
   padding: 0 1.5rem 2rem;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
 .card {
-  background: #ffffff;
+  background: #fff;
   border: 1px solid #d0d7de;
   border-radius: 0.5rem;
   padding: 1rem;
 }
 
-#next-steps {
+.process-grid {
+  margin-top: 1rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.process-step {
+  border: 1px solid #d0d7de;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: #fff;
+}
+
+.step-title {
   margin: 0;
-  padding-left: 1.2rem;
+  padding: 0.8rem;
+  font-size: 1.1rem;
+  border-bottom: 1px solid #b7bfc8;
+}
+
+.step-title.step-core {
+  background: #95e085;
+}
+
+.step-title.step-check {
+  background: #f8c20a;
+}
+
+.step-content {
+  padding: 0.8rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.step-content ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.step-meta {
+  font-size: 0.92rem;
+}
+
+.step-optional {
+  margin-left: 0.4rem;
+  font-size: 0.78rem;
+  color: #24292f;
+  background: #ffeb80;
+  border: 1px solid #f1cc00;
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+  vertical-align: middle;
+}
+
+.config-grid {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.config-grid label {
+  display: grid;
+  gap: 0.3rem;
+  font-weight: 600;
+  font-size: 0.93rem;
+}
+
+.config-grid input,
+.config-grid select,
+.config-grid textarea,
+.config-grid button {
+  width: 100%;
+  font: inherit;
+  padding: 0.55rem;
+  border: 1px solid #c8d1dc;
+  border-radius: 0.4rem;
+  background: #fff;
+}
+
+.config-grid textarea {
+  resize: vertical;
+}
+
+#ai-run {
+  align-self: end;
+  background: #1f6feb;
+  color: #fff;
+  cursor: pointer;
+  border: 1px solid #1b63d1;
+}
+
+#ai-run:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.ai-output-wrap {
+  margin-top: 1rem;
+}
+
+#ai-output {
+  margin-top: 0.4rem;
+  background: #0d1117;
+  color: #f0f6fc;
+  border-radius: 0.4rem;
+  padding: 0.75rem;
+  white-space: pre-wrap;
+  min-height: 100px;
 }
