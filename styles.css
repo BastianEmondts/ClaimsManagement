@@ -21,8 +21,10 @@
   --cs-sand-light: #EBE7E0;
   --cs-palmtree:   #00806F;
   --cs-coral:      #E85D6E;
+  --cs-coral-light:#FCE8EA;
   --cs-text:       #000000;
   --cs-marine-light: #B9CDD3;
+  --cs-marine-dark:  #003347;
   --cs-gray-light: #E8EEF0;
 
   /* Semantic mappings */
@@ -437,7 +439,7 @@ h1, h2, h3 { margin: 0; }
 
 .file-remove-btn:hover {
   color: var(--cs-coral);
-  background: #fce8ea;
+  background: var(--cs-coral-light);
 }
 
 /* ── Step Navigation Tabs ────────────────────────────────────── */
@@ -821,7 +823,7 @@ h1, h2, h3 { margin: 0; }
   justify-content: center;
 }
 
-.ai-run-btn:hover:not(:disabled) { background: #003347; border-color: #003347; }
+.ai-run-btn:hover:not(:disabled) { background: var(--cs-marine-dark); border-color: var(--cs-marine-dark); }
 
 /* AI result */
 .ai-result-wrap { display: grid; gap: 0.4rem; }
