@@ -207,6 +207,14 @@ async function runAzureOpenAIDemo(event) {
     return;
   }
 
+  let validatedEndpoint;
+  try {
+    validatedEndpoint = new URL(endpoint);
+  } catch {
+    aiOutput.textContent = "Der Azure OpenAI Endpoint ist keine gültige URL.";
+    return;
+  }
+
   const userPrompt = [
     "Erstelle eine kurze fachliche Einschätzung für diesen Claim-Prozessschritt:",
     `Prozess-Schritt: ${selectedStep.title}`,
@@ -224,7 +232,7 @@ async function runAzureOpenAIDemo(event) {
 
   try {
     const response = await fetch(
-      `${endpoint}/openai/deployments/${encodeURIComponent(deployment)}/chat/completions?api-version=${encodeURIComponent(apiVersion)}`,
+      `${validatedEndpoint.origin}/openai/deployments/${encodeURIComponent(deployment)}/chat/completions?api-version=${encodeURIComponent(apiVersion)}`,
       {
         method: "POST",
         headers: {
