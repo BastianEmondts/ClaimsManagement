@@ -1,18 +1,45 @@
 # ClaimsManagement
 
-Base solution for a Claims Management web application.
+Demo-Applikation für Claim-Management im Bauwesen als statische Web-App.
 
-## Project structure
+## Enthaltene Demo-Funktionen
 
-- `index.html`: Application shell
-- `styles.css`: Basic styling
-- `app.js`: Starter client-side behavior
-- `.github/workflows/deploy-pages.yml`: GitHub Pages deployment workflow
+- Prozessdarstellung entlang der bereitgestellten Claim-Management-Schritte
+- Je Prozessschritt:
+  - Prozess-Schritt im farbigen Kasten
+  - Details darunter
+  - zugeordnete Rolle(n)
+  - relevante Unterlagen
+- Azure OpenAI Demo-Anbindung direkt im Frontend:
+  - Endpoint
+  - Deployment Name
+  - API-Version
+  - API-Key
+  - Auswahl eines Prozess-Schritts + optionale Zusatzanweisung
 
-## Local preview
+> Hinweis: Es gibt in dieser Demo bewusst keine persistente Datenhaltung.
 
-Open `index.html` in your browser.
+## Projektstruktur
+
+- `index.html`: UI-Struktur für Prozessdarstellung und Azure-OpenAI-Konfiguration
+- `styles.css`: Styling für Karten, Prozessschritte und Konfigurationsformular
+- `app.js`: Rendering der Prozessdaten und Azure OpenAI Aufruflogik
+- `.github/workflows/deploy-pages.yml`: GitHub Pages Deployment auf Push nach `main`
+
+## Lokale Vorschau
+
+Öffne `index.html` im Browser.
 
 ## GitHub Pages
 
-The repository includes a GitHub Actions workflow that deploys the static site to GitHub Pages on pushes to `main`.
+Das Repository enthält bereits einen GitHub Actions Workflow, der die statische Seite auf GitHub Pages deployed.
+
+## Azure OpenAI Konfiguration (Demo)
+
+1. Azure OpenAI Endpoint eintragen (z. B. `https://<resource>.openai.azure.com`)
+2. Deployment Name eintragen
+3. API-Version eintragen
+4. API-Key eintragen
+5. Prozess-Schritt auswählen und „AI-Demo ausführen“ klicken
+
+Die Konfiguration erfolgt vollständig im Frontend und wird nicht dauerhaft gespeichert.

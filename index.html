@@ -1,29 +1,110 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Claims Management</title>
+    <title>Claim-Management Demo</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <header class="header">
-      <h1>Claims Management</h1>
-      <p class="subtitle">Base web application ready for future enhancements.</p>
+      <h1>Claims Management – Demo</h1>
+      <p class="subtitle">
+        UI-Demo für den Claim-Management-Prozess im Bauwesen (ohne Datenhaltung).
+      </p>
     </header>
 
-    <main class="content">
-      <section class="card">
-        <h2>Overview</h2>
-        <p>
-          This starter page is intentionally minimal and can be extended through
-          future GitHub issues.
+    <main class="layout">
+      <section class="card" aria-labelledby="process-title">
+        <h2 id="process-title">Prozessschritte</h2>
+        <p class="section-intro">
+          In den farbigen Kästen stehen die Prozess-Schritte, darunter die jeweiligen
+          Details, Rollen und Unterlagen.
         </p>
+        <div id="process-steps" class="process-grid" aria-live="polite"></div>
       </section>
 
-      <section class="card">
-        <h2>Next steps</h2>
-        <ul id="next-steps"></ul>
+      <section class="card" aria-labelledby="ai-title">
+        <h2 id="ai-title">Azure OpenAI Demo (Frontend-Konfiguration)</h2>
+        <p class="section-intro">
+          Konfiguriere den Azure OpenAI Service direkt im Frontend und lasse einen
+          ausgewählten Prozess-Schritt zusammenfassen.
+        </p>
+
+        <form id="ai-config-form" class="config-grid">
+          <label>
+            Azure OpenAI Endpoint
+            <input
+              id="azure-endpoint"
+              name="azure-endpoint"
+              type="url"
+              placeholder="https://resource-name.openai.azure.com"
+              required
+            />
+          </label>
+
+          <label>
+            Deployment Name
+            <input
+              id="azure-deployment"
+              name="azure-deployment"
+              type="text"
+              placeholder="gpt-4o-mini"
+              required
+            />
+          </label>
+
+          <label>
+            API-Version
+            <input
+              id="azure-api-version"
+              name="azure-api-version"
+              type="text"
+              value="2024-10-21"
+              required
+            />
+          </label>
+
+          <label>
+            API-Key
+            <input
+              id="azure-api-key"
+              name="azure-api-key"
+              type="password"
+              autocomplete="off"
+              required
+            />
+          </label>
+
+          <label>
+            Prozess-Schritt
+            <select id="ai-step-select" name="ai-step-select" required></select>
+          </label>
+
+          <label>
+            Zusätzliche Anweisung
+            <textarea
+              id="ai-instruction"
+              name="ai-instruction"
+              rows="3"
+              placeholder="z. B. Gib eine kurze Verhandlungsstrategie aus"
+            ></textarea>
+          </label>
+
+          <button id="ai-run" type="submit">AI-Demo ausführen</button>
+        </form>
+
+        <div class="ai-output-wrap">
+          <h3>AI-Ausgabe</h3>
+          <pre id="ai-output">Noch keine Ausgabe.</pre>
+        </div>
+
+        <p class="disclaimer">
+          <strong>Sicherheits-Hinweis:</strong> API-Keys niemals in produktiven
+          Frontend-Anwendungen verwenden. Diese Eingabe ist ausschließlich für die
+          Demo gedacht. Die Demo speichert keine Daten dauerhaft, der API-Key bleibt
+          nur in der aktuellen Browser-Sitzung.
+        </p>
       </section>
     </main>
 
