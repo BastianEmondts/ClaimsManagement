@@ -117,6 +117,7 @@ const processSteps = [
     documents: ["Dokumentation in Claimtool"],
   },
 ];
+const DEFAULT_TEMPERATURE = 0.2;
 
 const processStepsContainer = document.getElementById("process-steps");
 const aiConfigForm = document.getElementById("ai-config-form");
@@ -195,7 +196,7 @@ async function runAzureOpenAIDemo(event) {
   event.preventDefault();
 
   const formData = new FormData(aiConfigForm);
-  const endpoint = String(formData.get("azure-endpoint") || "").trim().replace(/\/$/, "");
+  const endpoint = String(formData.get("azure-endpoint") || "").trim();
   const deployment = String(formData.get("azure-deployment") || "").trim();
   const apiVersion = String(formData.get("azure-api-version") || "").trim();
   const apiKey = String(formData.get("azure-api-key") || "").trim();
@@ -207,9 +208,9 @@ async function runAzureOpenAIDemo(event) {
     return;
   }
 
-  let validatedEndpoint;
+  let normalizedEndpoint;
   try {
-    validatedEndpoint = new URL(endpoint);
+    normalizedEndpoint = new URL(endpoint).origin;
   } catch {
     aiOutput.textContent = "Der Azure OpenAI Endpoint ist keine gültige URL.";
     return;
@@ -232,7 +233,7 @@ async function runAzureOpenAIDemo(event) {
 
   try {
     const response = await fetch(
-      `${validatedEndpoint.origin}/openai/deployments/${encodeURIComponent(deployment)}/chat/completions?api-version=${encodeURIComponent(apiVersion)}`,
+      `${normalizedEndpoint}/openai/deployments/${encodeURIComponent(deployment)}/chat/completions?api-version=${encodeURIComponent(apiVersion)}`,
       {
         method: "POST",
         headers: {
@@ -251,7 +252,7 @@ async function runAzureOpenAIDemo(event) {
               content: userPrompt,
             },
           ],
-          temperature: 0.2,
+          temperature: DEFAULT_TEMPERATURE,
         }),
       },
     );
