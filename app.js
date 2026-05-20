@@ -134,7 +134,7 @@ const detailFieldConfig = {
   claimpruefung: [
     { name: "eingangDatum", label: "Eingangsdatum", type: "date", required: true },
     { name: "claimReferenz", label: "Claim-Referenz", type: "text", required: true },
-    { name: "anzeigeGeprueft", label: "Anzeigen vollständig geprüft", type: "checkbox", required: true, fullWidth: true },
+    { name: "anzeigeGeprueft", label: "Anzeige vollständig geprüft", type: "checkbox", required: true, fullWidth: true },
     { name: "formalKommentar", label: "Kommentar zur formalen Prüfung", type: "textarea", required: true, fullWidth: true, rows: 3 },
   ],
   "fachtechnische-pruefung": [
@@ -186,7 +186,7 @@ const detailFieldConfig = {
 };
 let currentDetailStepIndex = 0;
 let highestUnlockedDetailStepIndex = 0;
-const completedDetailSteps = new Set();
+const detailCompletedSteps = new Set();
 const detailValuesByStepId = {};
 
 function createList(items) {
@@ -263,13 +263,14 @@ function saveFieldValue(stepId, fieldName, value) {
   detailValuesByStepId[stepId][fieldName] = value;
 }
 
-function getFieldValue(stepId, fieldName, fallbackValue = "") {
+function getFieldValue(stepId, fieldName, fallbackValue) {
   return detailValuesByStepId[stepId]?.[fieldName] ?? fallbackValue;
 }
 
 function createFieldInput(step, field) {
   if (field.type === "textarea") {
     const textarea = document.createElement("textarea");
+    textarea.id = `detail-${step.id}-${field.name}`;
     textarea.name = field.name;
     textarea.rows = field.rows || 3;
     textarea.required = Boolean(field.required);
@@ -280,6 +281,7 @@ function createFieldInput(step, field) {
 
   if (field.type === "select") {
     const select = document.createElement("select");
+    select.id = `detail-${step.id}-${field.name}`;
     select.name = field.name;
     select.required = Boolean(field.required);
     const placeholder = document.createElement("option");
@@ -304,6 +306,7 @@ function createFieldInput(step, field) {
   }
 
   const input = document.createElement("input");
+  input.id = `detail-${step.id}-${field.name}`;
   input.type = field.type;
   input.name = field.name;
   input.required = Boolean(field.required);
@@ -319,6 +322,28 @@ function createFieldInput(step, field) {
   return input;
 }
 
+function getDetailStepMarker(step, index) {
+  if (detailCompletedSteps.has(step.id)) {
+    return "✓";
+  }
+
+  if (index <= highestUnlockedDetailStepIndex) {
+    return "→";
+  }
+
+  return "🔒";
+}
+
+function getDetailStepStatusText(step, index) {
+  if (detailCompletedSteps.has(step.id)) {
+    return "Abgeschlossen";
+  }
+  if (index <= highestUnlockedDetailStepIndex) {
+    return "Freigegeben";
+  }
+  return "Gesperrt";
+}
+
 function renderDetailStepper() {
   detailStepper.replaceChildren();
 
@@ -330,16 +355,17 @@ function renderDetailStepper() {
     if (index === currentDetailStepIndex) {
       button.classList.add("current");
     }
-    if (completedDetailSteps.has(step.id)) {
+    if (detailCompletedSteps.has(step.id)) {
       button.classList.add("completed");
     }
+    button.ariaLabel = `${step.title} – ${getDetailStepStatusText(step, index)}`;
 
     const title = document.createElement("span");
     title.textContent = `${index + 1}. ${step.title}`;
     button.appendChild(title);
 
     const marker = document.createElement("strong");
-    marker.textContent = completedDetailSteps.has(step.id) ? "✓" : index <= highestUnlockedDetailStepIndex ? "→" : "🔒";
+    marker.textContent = getDetailStepMarker(step, index);
     button.appendChild(marker);
 
     button.addEventListener("click", () => {
@@ -356,7 +382,7 @@ function renderDetailScreen() {
   const fields = getDetailFields(step.id);
 
   detailStepTitle.textContent = `${currentDetailStepIndex + 1}. ${step.title}`;
-  if (completedDetailSteps.has(step.id)) {
+  if (detailCompletedSteps.has(step.id)) {
     detailStepStatus.textContent = "Abgeschlossen";
     detailStepStatus.className = "detail-status completed";
   } else {
@@ -369,8 +395,12 @@ function renderDetailScreen() {
   fields.forEach((field) => {
     if (field.type === "checkbox") {
       const checkboxLabel = document.createElement("label");
-      checkboxLabel.className = `detail-checkbox${field.fullWidth ? " full-width" : ""}`;
+      checkboxLabel.classList.add("detail-checkbox");
+      if (field.fullWidth) {
+        checkboxLabel.classList.add("full-width");
+      }
       const checkbox = createFieldInput(step, field);
+      checkboxLabel.htmlFor = checkbox.id;
       checkboxLabel.appendChild(checkbox);
       checkboxLabel.append(field.label);
       detailForm.appendChild(checkboxLabel);
@@ -382,7 +412,9 @@ function renderDetailScreen() {
       label.classList.add("full-width");
     }
     label.textContent = field.label;
-    label.appendChild(createFieldInput(step, field));
+    const input = createFieldInput(step, field);
+    label.htmlFor = input.id;
+    label.appendChild(input);
     detailForm.appendChild(label);
   });
 
@@ -408,7 +440,7 @@ function completeAndAdvanceDetailStep() {
   }
 
   const currentStep = processSteps[currentDetailStepIndex];
-  completedDetailSteps.add(currentStep.id);
+  detailCompletedSteps.add(currentStep.id);
 
   if (currentDetailStepIndex < processSteps.length - 1) {
     highestUnlockedDetailStepIndex = Math.max(highestUnlockedDetailStepIndex, currentDetailStepIndex + 1);
