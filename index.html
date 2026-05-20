@@ -3,137 +3,255 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Claim-Management Demo</title>
+    <title>Claims Management</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <header class="header">
-      <h1>Claims Management – Demo</h1>
-      <p class="subtitle">
-        UI-Demo für den Claim-Management-Prozess im Bauwesen (ohne Datenhaltung).
-      </p>
+    <!-- ── Top Navigation Bar ─────────────────────────────────── -->
+    <header class="navbar">
+      <div class="navbar-left">
+        <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        <span class="brand-name">Claims Management</span>
+      </div>
+
+      <nav class="navbar-nav" aria-label="Hauptnavigation">
+        <button class="nav-link active" type="button">Meine Claims</button>
+        <button class="nav-link" type="button">Übersicht</button>
+        <button class="nav-link" type="button">Berichte</button>
+      </nav>
+
+      <div class="navbar-right">
+        <span class="navbar-user">K. Müller · Claim Manager</span>
+        <div class="settings-wrapper">
+          <button
+            class="icon-btn"
+            id="settings-trigger"
+            aria-label="Einstellungen öffnen"
+            aria-expanded="false"
+            aria-controls="settings-panel"
+            title="Einstellungen / KI-Konfiguration"
+          >
+            <!-- gear icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83
+                       2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33
+                       1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09
+                       A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06
+                       a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06
+                       A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3
+                       a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9
+                       a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83
+                       2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68
+                       a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09
+                       a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06
+                       a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06
+                       A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21
+                       a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </button>
+
+          <!-- Settings Dropdown Panel -->
+          <div class="settings-panel" id="settings-panel" hidden>
+            <div class="settings-header">
+              <h3 class="settings-title">KI-Konfiguration (Azure OpenAI)</h3>
+              <button class="icon-btn settings-close-btn" id="settings-close"
+                      aria-label="Einstellungen schließen" type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <form id="ai-config-form" class="settings-form">
+              <label>
+                Azure OpenAI Endpoint
+                <input id="azure-endpoint" name="azure-endpoint" type="url"
+                       placeholder="https://resource-name.openai.azure.com" />
+              </label>
+              <label>
+                Deployment
+                <input id="azure-deployment" name="azure-deployment" type="text"
+                       placeholder="gpt-4o" />
+              </label>
+              <label>
+                API-Version
+                <input id="azure-api-version" name="azure-api-version" type="text"
+                       value="2024-10-21" />
+              </label>
+              <label>
+                API-Key
+                <input id="azure-api-key" name="azure-api-key" type="password"
+                       autocomplete="off" placeholder="sk-…" />
+              </label>
+              <p class="settings-disclaimer">
+                Der API-Key wird ausschließlich in der aktuellen Browser-Sitzung
+                verwendet und nicht dauerhaft gespeichert.
+              </p>
+              <button type="submit" class="primary-button settings-save-btn">
+                Konfiguration übernehmen
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
     </header>
 
-    <main class="layout">
-      <section class="card" aria-labelledby="process-title">
-        <h2 id="process-title">Prozessschritte</h2>
-        <p class="section-intro">
-          In den farbigen Kästen stehen die Prozess-Schritte, darunter die jeweiligen
-          Details, Rollen und Unterlagen.
-        </p>
-        <div id="process-steps" class="process-grid" aria-live="polite"></div>
-      </section>
+    <!-- ── Claim Context Bar ──────────────────────────────────── -->
+    <div class="claim-bar">
+      <div class="claim-bar-left">
+        <label class="claim-selector-label" for="claim-selector">Aktiver Claim:</label>
+        <select id="claim-selector" class="claim-selector">
+          <option value="CM-2024-047">
+            CM-2024-047 – Nachtragsangebot Tiefbau / Zufahrtsstraße
+          </option>
+          <option value="CM-2024-031">
+            CM-2024-031 – Mehrvergütungsanspruch Stahlbau
+          </option>
+          <option value="CM-2024-028">
+            CM-2024-028 – Terminverzug Phase Rohbau
+          </option>
+        </select>
+        <span class="claim-badge status-active">In Bearbeitung</span>
+        <span class="claim-meta-item">Betrag: <strong>€ 142.500</strong></span>
+        <span class="claim-meta-item">AN: <strong>Müller Bau GmbH</strong></span>
+      </div>
+      <button class="secondary-button upload-btn" id="upload-trigger" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        Dokument hochladen
+      </button>
+    </div>
 
-      <section class="card" aria-labelledby="detail-title">
-        <h2 id="detail-title">Detail-Screens je Prozess-Schritt</h2>
-        <p class="section-intro">
-          Bearbeite die Prozessschritte nacheinander. Ein Schritt wird erst nach
-          vollständiger Eingabe freigegeben.
-        </p>
+    <!-- ── Main Workspace ────────────────────────────────────── -->
+    <main class="workspace">
 
-        <div id="detail-stepper" class="detail-stepper" aria-live="polite"></div>
+      <!-- Left Column: Process + Form -->
+      <div class="main-column">
 
-        <article class="detail-screen">
-          <header class="detail-screen-header">
-            <h3 id="detail-step-title"></h3>
+        <!-- Document Upload Panel (hidden by default) -->
+        <div class="upload-panel" id="upload-panel" hidden>
+          <div class="upload-panel-header">
+            <h3>Dokumente zum Claim hochladen</h3>
+            <button class="icon-btn upload-close-btn" id="upload-panel-close"
+                    aria-label="Schließen" type="button">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          <div class="upload-drop-zone" id="upload-drop-zone">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="1.5"
+                 width="48" height="48" class="upload-icon">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <p class="upload-drop-text">Dateien hierher ziehen oder</p>
+            <button type="button" class="secondary-button" id="file-browse-btn">
+              Datei auswählen
+            </button>
+            <p class="upload-hint">PDF, DOCX, XLSX, JPG, PNG · max. 25 MB je Datei</p>
+            <input type="file" id="file-input" multiple
+                   accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" hidden />
+          </div>
+          <ul class="file-list" id="uploaded-files"
+              aria-label="Hochgeladene Dokumente" aria-live="polite"></ul>
+        </div>
+
+        <!-- Step Navigation Tabs -->
+        <nav class="step-nav" id="detail-stepper" aria-label="Prozessschritte"></nav>
+
+        <!-- Detail Form Card -->
+        <article class="detail-card">
+          <header class="detail-card-header">
+            <div class="detail-card-title-group">
+              <h2 id="detail-step-title"></h2>
+              <p id="detail-step-role" class="detail-step-role"></p>
+            </div>
             <span id="detail-step-status" class="detail-status"></span>
           </header>
+
+          <div id="step-required-docs" class="required-docs" hidden></div>
 
           <form id="detail-form" class="detail-form"></form>
 
           <div class="detail-actions">
             <button id="detail-prev" class="secondary-button" type="button">
-              Zurück
+              ← Zurück
             </button>
             <button id="detail-next" class="primary-button" type="button">
-              Schritt abschließen &amp; weiter
+              Abschließen &amp; weiter →
             </button>
           </div>
         </article>
-      </section>
+      </div>
 
-      <section class="card" aria-labelledby="ai-title">
-        <h2 id="ai-title">Azure OpenAI Demo (Frontend-Konfiguration)</h2>
-        <p class="section-intro">
-          Konfiguriere den Azure OpenAI Service direkt im Frontend und lasse einen
-          ausgewählten Prozess-Schritt zusammenfassen.
-        </p>
-
-        <form id="ai-config-form" class="config-grid">
-          <label>
-            Azure OpenAI Endpoint
-            <input
-              id="azure-endpoint"
-              name="azure-endpoint"
-              type="url"
-              placeholder="https://resource-name.openai.azure.com"
-              required
-            />
-          </label>
-
-          <label>
-            Deployment Name
-            <input
-              id="azure-deployment"
-              name="azure-deployment"
-              type="text"
-              placeholder="gpt-4o-mini"
-              required
-            />
-          </label>
-
-          <label>
-            API-Version
-            <input
-              id="azure-api-version"
-              name="azure-api-version"
-              type="text"
-              value="2024-10-21"
-              required
-            />
-          </label>
-
-          <label>
-            API-Key
-            <input
-              id="azure-api-key"
-              name="azure-api-key"
-              type="password"
-              autocomplete="off"
-              required
-            />
-          </label>
-
-          <label>
-            Prozess-Schritt
-            <select id="ai-step-select" name="ai-step-select" required></select>
-          </label>
-
-          <label>
-            Zusätzliche Anweisung
-            <textarea
-              id="ai-instruction"
-              name="ai-instruction"
-              rows="3"
-              placeholder="z. B. Gib eine kurze Verhandlungsstrategie aus"
-            ></textarea>
-          </label>
-
-          <button id="ai-run" type="submit">AI-Demo ausführen</button>
-        </form>
-
-        <div class="ai-output-wrap">
-          <h3>AI-Ausgabe</h3>
-          <pre id="ai-output">Noch keine Ausgabe.</pre>
+      <!-- Right Column: AI Assistance Sidebar -->
+      <aside class="ai-sidebar" aria-labelledby="ai-sidebar-title">
+        <div class="ai-sidebar-header">
+          <div class="ai-sidebar-title-row">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                 fill="currentColor" width="20" height="20" class="ai-sparkle">
+              <path d="M12 2l2.09 6.26L20 10l-5.91 1.74L12 18l-2.09-6.26L4 10
+                       l5.91-1.74z"/>
+            </svg>
+            <h2 id="ai-sidebar-title" class="ai-sidebar-title">KI-Unterstützung</h2>
+          </div>
+          <span class="ai-provider-badge">Azure OpenAI</span>
         </div>
 
-        <p class="disclaimer">
-          <strong>Sicherheits-Hinweis:</strong> API-Keys niemals in produktiven
-          Frontend-Anwendungen verwenden. Diese Eingabe ist ausschließlich für die
-          Demo gedacht. Die Demo speichert keine Daten dauerhaft, der API-Key bleibt
-          nur in der aktuellen Browser-Sitzung.
-        </p>
-      </section>
+        <!-- Per-step AI info (filled by JS) -->
+        <div id="ai-step-info" class="ai-step-info"></div>
+
+        <!-- Hidden step select (synced with active form step) -->
+        <select id="ai-step-select" hidden></select>
+
+        <div class="ai-actions">
+          <label class="ai-instruction-label">
+            Zusätzliche Anweisung an die KI
+            <textarea id="ai-instruction" rows="2"
+                      placeholder="z. B. Fokussiere auf preisliche Abweichungen"></textarea>
+          </label>
+          <button id="ai-run" type="button" class="primary-button ai-run-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2"
+                 width="14" height="14">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            KI-Analyse starten
+          </button>
+        </div>
+
+        <div class="ai-result-wrap">
+          <div class="ai-result-header">
+            <span class="ai-result-label">Analyseergebnis</span>
+            <button class="link-btn" id="ai-copy-btn" type="button" hidden>
+              Kopieren
+            </button>
+          </div>
+          <div id="ai-output" class="ai-result">
+            Noch keine Analyse für diesen Schritt durchgeführt.
+          </div>
+        </div>
+      </aside>
     </main>
 
     <script src="./app.js"></script>
