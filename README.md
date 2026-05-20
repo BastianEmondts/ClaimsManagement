@@ -10,6 +10,9 @@ Demo-Applikation für Claim-Management im Bauwesen als statische Web-App.
   - Details darunter
   - zugeordnete Rolle(n)
   - relevante Unterlagen
+- Detail-Screen je Prozess-Schritt mit relevanten Input-Masken
+  - sequenzielle Bearbeitung entlang des Prozess-Strangs (Schritt-für-Schritt)
+  - Teams-/FluentUI-orientiertes Erscheinungsbild (Segoe UI, Fluent-Farbwelt)
 - Azure OpenAI Demo-Anbindung direkt im Frontend:
   - Endpoint
   - Deployment Name
