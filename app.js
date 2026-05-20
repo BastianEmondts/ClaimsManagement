@@ -9,7 +9,7 @@ const processSteps = [
       "Vorausgehende Ereignisse, Anzeigen etc.",
     ],
     role: ["Claim Manager"],
-    documents: ["Eingegangener Schriftsatz", "Nachtrags-angebot", "Historie/Anlagen"],
+    documents: ["Eingegangener Schriftsatz", "Nachtragsangebot", "Historie/Anlagen"],
   },
   {
     id: "fachtechnische-pruefung",
@@ -53,7 +53,7 @@ const processSteps = [
       "Vertragliche Prüfung unter Einbeziehung und Bewertung der technischen Prüfung",
     ],
     role: ["Contract Manager", "Rechtliche Beratung"],
-    documents: ["Eingegangener Schriftsatz", "Nachtrags-angebot", "Vertrag im Ganzen"],
+    documents: ["Eingegangener Schriftsatz", "Nachtragsangebot", "Vertrag im Ganzen"],
   },
   {
     id: "terminliche-pruefung",
@@ -64,7 +64,7 @@ const processSteps = [
       "Prüfung von Abweichungen auf wesentliche Meilensteine, betroffene Terminpläne",
     ],
     role: ["Terminplaner"],
-    documents: ["Eingegangener Schriftsatz", "Nachtrags-angebot", "Terminpläne"],
+    documents: ["Eingegangener Schriftsatz", "Nachtragsangebot", "Terminpläne"],
   },
   {
     id: "pruefung-hoehe",
@@ -102,7 +102,7 @@ const processSteps = [
       "Verhandlung vorbereiten",
     ],
     role: ["Claim Manager"],
-    documents: ["Nachtrags-angebot", "Vertrag", "Nachtrags-/Bestellhistorie", "Dokumentation"],
+    documents: ["Nachtragsangebot", "Vertrag", "Nachtrags-/Bestellhistorie", "Dokumentation"],
   },
   {
     id: "annahme-ablehnung",
