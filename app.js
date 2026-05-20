@@ -9,7 +9,7 @@ const processSteps = [
       "Vorausgehende Ereignisse, Anzeigen etc.",
     ],
     role: ["Claim Manager"],
-    documents: ["Eingegangener Schriftsatz", "Nachtrags-angebot", "Historie/ Anlagen"],
+    documents: ["Eingegangener Schriftsatz", "Nachtrags-angebot", "Historie/Anlagen"],
   },
   {
     id: "fachtechnische-pruefung",
@@ -94,7 +94,7 @@ const processSteps = [
     id: "verhandlung",
     title: "Verhandlung durchführen",
     type: "check",
-    optional: "optional: AG-spezifisch",
+    optional: "AG-spezifisch",
     details: [
       "Zu verhandelnde Punkte identifizieren",
       "Verhandlungsstrategie festlegen",
