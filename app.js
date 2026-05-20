@@ -117,7 +117,7 @@ const processSteps = [
     documents: ["Dokumentation in Claimtool"],
   },
 ];
-const DEFAULT_TEMPERATURE = 0.2;
+const AI_MODEL_TEMPERATURE = 0.2;
 
 const processStepsContainer = document.getElementById("process-steps");
 const aiConfigForm = document.getElementById("ai-config-form");
@@ -209,10 +209,19 @@ async function runAzureOpenAIDemo(event) {
   }
 
   let normalizedEndpoint;
+  let endpointPathname = "";
   try {
-    normalizedEndpoint = new URL(endpoint).origin;
+    const parsedEndpoint = new URL(endpoint);
+    normalizedEndpoint = parsedEndpoint.origin;
+    endpointPathname = parsedEndpoint.pathname;
   } catch {
     aiOutput.textContent = "Der Azure OpenAI Endpoint ist keine gültige URL.";
+    return;
+  }
+
+  if (endpointPathname && endpointPathname !== "/") {
+    aiOutput.textContent =
+      "Der Endpoint darf keinen zusätzlichen Pfad enthalten (nur https://<resource>.openai.azure.com).";
     return;
   }
 
@@ -252,7 +261,7 @@ async function runAzureOpenAIDemo(event) {
               content: userPrompt,
             },
           ],
-          temperature: DEFAULT_TEMPERATURE,
+          temperature: AI_MODEL_TEMPERATURE,
         }),
       },
     );
