@@ -117,7 +117,7 @@ const processSteps = [
     documents: ["Dokumentation in Claimtool"],
   },
 ];
-const AI_MODEL_TEMPERATURE = 0.2;
+const aiModelTemperature = 0.2;
 
 const processStepsContainer = document.getElementById("process-steps");
 const aiConfigForm = document.getElementById("ai-config-form");
@@ -261,7 +261,7 @@ async function runAzureOpenAIDemo(event) {
               content: userPrompt,
             },
           ],
-          temperature: AI_MODEL_TEMPERATURE,
+          temperature: aiModelTemperature,
         }),
       },
     );
