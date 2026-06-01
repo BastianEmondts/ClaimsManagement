@@ -4,7 +4,7 @@
 const processSteps = [
   {
     id: "claimpruefung",
-    title: "Claimprüfung durchführen",
+    title: "Formale Prüfung",
     type: "core",
     details: [
       "Formale Prüfung",
@@ -16,7 +16,7 @@ const processSteps = [
   },
   {
     id: "fachtechnische-pruefung",
-    title: "(Fach-)Technische Prüfung",
+    title: "(Fach-) Technische Prüfung",
     type: "check",
     details: [
       "Fachlich inhaltliche Prüfung, inkl. Beschreibung der Leistung richtig",
@@ -84,7 +84,7 @@ const processSteps = [
   },
   {
     id: "risikoangaben",
-    title: "Risikoangaben eintragen",
+    title: "Risikobewertung",
     type: "check",
     details: [
       "Abgleich mit Risikoregister",
@@ -95,7 +95,7 @@ const processSteps = [
   },
   {
     id: "verhandlung",
-    title: "Verhandlung durchführen",
+    title: "Verhandlung",
     type: "check",
     optional: "AG-spezifisch",
     details: [
@@ -109,7 +109,7 @@ const processSteps = [
   },
   {
     id: "annahme-ablehnung",
-    title: "Annahme-/Ablehnungsschreiben",
+    title: "Annahme-/ Ablehnungsschreiben",
     type: "core",
     details: [
       "Freigabe durch Auftraggeber",
