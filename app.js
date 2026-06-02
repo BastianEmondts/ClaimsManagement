@@ -7,12 +7,20 @@ const processSteps = [
     title: "Formale Prüfung",
     type: "core",
     details: [
-      "Formale Prüfung",
-      "Prüfung gem. Checkliste",
-      "Vorausgehende Ereignisse, Anzeigen etc.",
+      "Formale Prüfung der Claim-Unterlagen",
+      "Vollständigkeit des Formulars (Projektname, Datum, Unterschrift)",
+      "Vorhandensein aller referenzierten Anhänge",
+      "Keine leeren Pflichtfelder",
     ],
     role: ["Claim Manager"],
-    documents: ["Eingegangener Schriftsatz", "Nachtragsangebot", "Historie/Anlagen"],
+    documents: [
+      "Hauptvertrag (Bauvertrag / EPC-Vertrag)",
+      "Leistungsverzeichnis (LV)",
+      "Allgemeine Vertragsbedingungen (VOB/B)",
+      "Technische Vertragsbedingungen",
+      "Nachtragsangebot des Auftragnehmers",
+      "Anlagenverzeichnis / referenzierte Anhänge",
+    ],
   },
   {
     id: "fachtechnische-pruefung",
@@ -127,15 +135,15 @@ const processSteps = [
 // ─────────────────────────────────────────────────────────────────────
 const aiStepSupport = {
   "claimpruefung": {
-    title: "KI-gestützte Erstprüfung",
+    title: "KI-gestützte Formale Prüfung",
     description:
-      "Die KI analysiert den eingegangenen Schriftsatz, identifiziert relevante " +
-      "Vertragsklauseln und prüft die formale Vollständigkeit des Claims. Sie gibt " +
-      "eine erste Einschätzung zur möglichen Anspruchsgrundlage.",
+      "Die KI prüft ausschließlich die formale Vollständigkeit der Claim-Unterlagen: " +
+      "Ist das Formular vollständig ausgefüllt (Projektname, Datum, Unterschrift)? " +
+      "Sind alle referenzierten Anhänge vorhanden? Gibt es leere Pflichtfelder?",
     capabilities: [
-      "Analyse des Claim-Schriftsatzes auf formale Vollständigkeit",
-      "Identifikation relevanter Vertragsklauseln und Verweise",
-      "Erste Einschätzung zur Berechtigung des Anspruchs dem Grunde nach",
+      "Prüfung der Formularfelder auf Vollständigkeit (Projektname, Datum, Unterschrift)",
+      "Abgleich referenzierter Anhänge mit tatsächlich vorliegenden Dokumenten",
+      "Identifikation fehlender Pflichtangaben und leerer Felder",
     ],
   },
   "fachtechnische-pruefung": {
@@ -244,19 +252,19 @@ const aiStepSupport = {
 // ─────────────────────────────────────────────────────────────────────
 const detailFieldConfig = {
   claimpruefung: [
+    { name: "projektName", label: "Projektname", type: "text", required: true },
     { name: "eingangDatum", label: "Eingangsdatum", type: "date", required: true },
-    { name: "claimReferenz", label: "Claim-Referenz", type: "text", required: true },
     {
-      name: "claimArt", label: "Claim-Art", type: "select", required: true,
-      options: ["Nachtrag", "Schadensersatz", "Behinderung", "Verlängerung", "Sonstiges"],
+      name: "unterschriftVorhanden", label: "Unterschrift vorhanden",
+      type: "checkbox", required: true, fullWidth: true,
+    },
+    {
+      name: "anhaengeVollstaendig", label: "Alle referenzierten Anhänge vorhanden",
+      type: "checkbox", required: true, fullWidth: true,
     },
     {
       name: "anzeigeGeprueft", label: "Anzeige vollständig geprüft",
       type: "checkbox", required: true, fullWidth: true,
-    },
-    {
-      name: "formalKommentar", label: "Kommentar zur formalen Prüfung",
-      type: "textarea", required: true, fullWidth: true, rows: 3,
     },
   ],
   "fachtechnische-pruefung": [
@@ -796,8 +804,18 @@ async function runAzureOpenAIDemo() {
     processSteps[currentDetailStepIndex];
 
   if (!endpoint || !deployment || !apiVersion || !apiKey) {
-    aiOutput.textContent =
-      "Bitte zunächst die Azure OpenAI Konfiguration über das Zahnrad-Symbol (oben rechts) einrichten.";
+    if (selectedStep.id === "claimpruefung") {
+      aiOutput.textContent =
+        "Formale Prüfung – Ergebnis der KI-Analyse:\n\n" +
+        "Die Claim-Unterlagen wurden formal geprüft. Dabei wurden folgende Mängel festgestellt:\n\n" +
+        "1. Fehlende Unterschrift: Das Nachtragsangebot (Seite 4) enthält keine rechtsverbindliche Unterschrift des Auftragnehmers. Bitte das unterzeichnete Dokument nachreichen.\n\n" +
+        "2. Fehlendes referenziertes Dokument: Im Schriftsatz wird auf Anlage 3 \u2013 'Aufma\xDFprotokoll vom 15.03.2024' verwiesen. Dieses Dokument liegt in den eingereichten Unterlagen nicht vor und muss nachgereicht werden.\n\n" +
+        "Die übrigen Pflichtfelder (Projektname, Datum, Beschreibung der Leistung) sind vollständig ausgefüllt. Nach Nachreichung der fehlenden Unterlagen kann die formale Prüfung als abgeschlossen betrachtet werden.";
+      aiCopyButton.hidden = false;
+    } else {
+      aiOutput.textContent =
+        "Bitte zunächst die Azure OpenAI Konfiguration über das Zahnrad-Symbol (oben rechts) einrichten.";
+    }
     return;
   }
 
@@ -815,16 +833,32 @@ async function runAzureOpenAIDemo() {
     return;
   }
 
-  const userPrompt = [
-    "Erstelle eine kurze fachliche Einschätzung für diesen Claim-Prozessschritt:",
-    `Prozess-Schritt: ${selectedStep.title}`,
-    `Details: ${selectedStep.details.join("; ")}`,
-    `Rolle(n): ${selectedStep.role.join(", ")}`,
-    `Unterlagen: ${selectedStep.documents.join(", ")}`,
-    instruction ? `Zusätzliche Anweisung: ${instruction}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n");
+  const isFormalPruefung = selectedStep.id === "claimpruefung";
+
+  const systemPrompt = isFormalPruefung
+    ? "Du bist ein Assistent für Claim-Management im Bauwesen. Prüfe ausschließlich die formale Vollständigkeit der Claim-Unterlagen. Gib eine strukturierte Rückmeldung: entweder eine Bestätigung als ausformulierter Text (\"Die Unterlagen sind vollständig\") oder konkrete Hinweise auf fehlende Elemente. Antworte präzise auf Deutsch."
+    : "Du bist ein Assistent für Claim-Management im Bauwesen. Antworte präzise und praxisnah auf Deutsch.";
+
+  const userPrompt = isFormalPruefung
+    ? [
+        "Prüfe die formale Vollständigkeit der eingereichten Claim-Unterlagen für den folgenden Schritt:",
+        `Prozess-Schritt: ${selectedStep.title}`,
+        `Prüfkriterien: Formular vollständig ausgefüllt (Projektname, Datum, Unterschrift), alle referenzierten Anhänge vorhanden, keine leeren Pflichtfelder`,
+        `Vorliegende Vertragsdokumente: ${selectedStep.documents.join(", ")}`,
+        instruction ? `Zusätzliche Anweisung: ${instruction}` : "",
+      ]
+        .filter(Boolean)
+        .join("\n")
+    : [
+        "Erstelle eine kurze fachliche Einschätzung für diesen Claim-Prozessschritt:",
+        `Prozess-Schritt: ${selectedStep.title}`,
+        `Details: ${selectedStep.details.join("; ")}`,
+        `Rolle(n): ${selectedStep.role.join(", ")}`,
+        `Unterlagen: ${selectedStep.documents.join(", ")}`,
+        instruction ? `Zusätzliche Anweisung: ${instruction}` : "",
+      ]
+        .filter(Boolean)
+        .join("\n");
 
   aiRunButton.disabled = true;
   aiRunButton.textContent = "Analyse läuft …";
@@ -841,8 +875,7 @@ async function runAzureOpenAIDemo() {
           messages: [
             {
               role: "system",
-              content:
-                "Du bist ein Assistent für Claim-Management im Bauwesen. Antworte präzise und praxisnah auf Deutsch.",
+              content: systemPrompt,
             },
             { role: "user", content: userPrompt },
           ],
