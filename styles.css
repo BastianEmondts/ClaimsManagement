@@ -828,18 +828,10 @@ h1, h2, h3 { margin: 0; }
 /* AI result */
 .ai-result-wrap { display: grid; gap: 0.4rem; }
 
-.ai-result-header {
+.ai-result-copy-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.ai-result-label {
-  font-size: 0.74rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  justify-content: flex-end;
+  min-height: 1.2rem;
 }
 
 .ai-result {
