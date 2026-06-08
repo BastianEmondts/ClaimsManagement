@@ -254,15 +254,15 @@ const detailFieldConfig = {
   claimpruefung: [
     {
       name: "unterschriftVorhanden", label: "Unterschrift vorhanden",
-      type: "checkbox", required: true, fullWidth: true,
+      type: "checkbox", required: true, checkboxRow: true,
     },
     {
       name: "anhaengeVollstaendig", label: "Alle referenzierten Anhänge vorhanden",
-      type: "checkbox", required: true, fullWidth: true,
+      type: "checkbox", required: true, checkboxRow: true,
     },
     {
       name: "anzeigeGeprueft", label: "Anzeige vollständig geprüft",
-      type: "checkbox", required: true, fullWidth: true,
+      type: "checkbox", required: true, checkboxRow: true,
     },
     {
       name: "ergebnisFormalePruefung", label: "Ergebnis der formalen Prüfung",
@@ -739,16 +739,31 @@ function renderDetailScreen() {
   }
 
   detailForm.replaceChildren();
+  let checkboxRowContainer = null;
   fields.forEach((field) => {
+    // Reset row container when leaving a consecutive checkboxRow group
+    if (!(field.type === "checkbox" && field.checkboxRow)) {
+      checkboxRowContainer = null;
+    }
+
     if (field.type === "checkbox") {
       const checkboxLabel = document.createElement("label");
       checkboxLabel.classList.add("detail-checkbox");
-      if (field.fullWidth) checkboxLabel.classList.add("full-width");
       const checkbox = createFieldInput(step, field);
       checkboxLabel.htmlFor = checkbox.id;
       checkboxLabel.appendChild(checkbox);
       checkboxLabel.append(field.label);
-      detailForm.appendChild(checkboxLabel);
+      if (field.checkboxRow) {
+        if (!checkboxRowContainer) {
+          checkboxRowContainer = document.createElement("div");
+          checkboxRowContainer.className = "checkbox-row";
+          detailForm.appendChild(checkboxRowContainer);
+        }
+        checkboxRowContainer.appendChild(checkboxLabel);
+      } else {
+        if (field.fullWidth) checkboxLabel.classList.add("full-width");
+        detailForm.appendChild(checkboxLabel);
+      }
       return;
     }
 
@@ -836,6 +851,42 @@ function syncKiResultToFormalePruefungField(result) {
   saveFieldValue("claimpruefung", ERGEBNIS_FORMALE_PRUEFUNG_FIELD, result);
   const el = document.getElementById(`detail-claimpruefung-${ERGEBNIS_FORMALE_PRUEFUNG_FIELD}`);
   if (el) el.value = result;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Auto-set claimpruefung checkboxes based on KI result text
+// ─────────────────────────────────────────────────────────────────────
+function setCheckboxesFromAiResult(result) {
+  if (processSteps[currentDetailStepIndex].id !== "claimpruefung") return;
+
+  const lower = result.toLowerCase();
+
+  const missingSignature =
+    (lower.includes("unterschrift") || lower.includes("signatur")) &&
+    (lower.includes("fehlend") || lower.includes("fehlt") ||
+      lower.includes("nicht vorhanden") || lower.includes("keine rechtsverbindliche"));
+
+  const missingAttachments =
+    (lower.includes("anhang") || lower.includes("anlage") || lower.includes("anhänge") ||
+      lower.includes("dokument")) &&
+    (lower.includes("fehlend") || lower.includes("fehlt") ||
+      lower.includes("nicht vor") || lower.includes("nicht vorhanden"));
+
+  const unterschriftValue = !missingSignature;
+  const anhaengeValue = !missingAttachments;
+  const anzeigeValue = true;
+
+  saveFieldValue("claimpruefung", "unterschriftVorhanden", unterschriftValue);
+  saveFieldValue("claimpruefung", "anhaengeVollstaendig", anhaengeValue);
+  saveFieldValue("claimpruefung", "anzeigeGeprueft", anzeigeValue);
+
+  const unterschriftEl = document.getElementById("detail-claimpruefung-unterschriftVorhanden");
+  const anhaengeEl = document.getElementById("detail-claimpruefung-anhaengeVollstaendig");
+  const anzeigeEl = document.getElementById("detail-claimpruefung-anzeigeGeprueft");
+
+  if (unterschriftEl) unterschriftEl.checked = unterschriftValue;
+  if (anhaengeEl) anhaengeEl.checked = anhaengeValue;
+  if (anzeigeEl) anzeigeEl.checked = anzeigeValue;
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -992,9 +1043,21 @@ async function runAzureOpenAIDemo() {
         "1. Fehlende Unterschrift: Das Nachtragsangebot (Seite 4) enthält keine rechtsverbindliche Unterschrift des Auftragnehmers. Bitte das unterzeichnete Dokument nachreichen.\n\n" +
         "2. Fehlendes referenziertes Dokument: Im Schriftsatz wird auf Anlage 3 \u2013 'Aufma\xDFprotokoll vom 15.03.2024' verwiesen. Dieses Dokument liegt in den eingereichten Unterlagen nicht vor und muss nachgereicht werden.\n\n" +
         "Die übrigen Pflichtfelder (Projektname, Datum, Beschreibung der Leistung) sind vollständig ausgefüllt. Nach Nachreichung der fehlenden Unterlagen kann die formale Prüfung als abgeschlossen betrachtet werden.";
+
+      aiRunButton.disabled = true;
+      aiRunButton.textContent = "Analyse läuft …";
+      aiOutput.textContent = "Anfrage wird geprüft …";
+      aiCopyButton.hidden = true;
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       aiOutput.textContent = demoResult;
       aiCopyButton.hidden = false;
       syncKiResultToFormalePruefungField(demoResult);
+      setCheckboxesFromAiResult(demoResult);
+
+      aiRunButton.disabled = false;
+      aiRunButton.textContent = "KI-Analyse starten";
     } else {
       aiOutput.textContent =
         "Bitte zunächst die Azure OpenAI Konfiguration über das Zahnrad-Symbol (oben rechts) einrichten.";
@@ -1080,6 +1143,7 @@ async function runAzureOpenAIDemo() {
       aiOutput.textContent = content.trim();
       aiCopyButton.hidden = false;
       syncKiResultToFormalePruefungField(content.trim());
+      setCheckboxesFromAiResult(content.trim());
     } else {
       aiOutput.textContent = "Keine verwertbare Ausgabe vom Modell erhalten.";
     }
