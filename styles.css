@@ -650,6 +650,13 @@ h1, h2, h3 { margin: 0; }
   margin-top: 1.25rem;
 }
 
+/* Generate button inside a form field label */
+.generate-btn {
+  margin-top: 0.4rem;
+  justify-self: start;
+  font-size: 0.82rem;
+}
+
 /* ── Buttons ─────────────────────────────────────────────────── */
 .primary-button,
 .secondary-button {

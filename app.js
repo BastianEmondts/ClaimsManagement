@@ -252,8 +252,6 @@ const aiStepSupport = {
 // ─────────────────────────────────────────────────────────────────────
 const detailFieldConfig = {
   claimpruefung: [
-    { name: "projektName", label: "Projektname", type: "text", required: true },
-    { name: "eingangDatum", label: "Eingangsdatum", type: "date", required: true },
     {
       name: "unterschriftVorhanden", label: "Unterschrift vorhanden",
       type: "checkbox", required: true, fullWidth: true,
@@ -265,6 +263,15 @@ const detailFieldConfig = {
     {
       name: "anzeigeGeprueft", label: "Anzeige vollständig geprüft",
       type: "checkbox", required: true, fullWidth: true,
+    },
+    {
+      name: "ergebnisFormalePruefung", label: "Ergebnis der formalen Prüfung",
+      type: "textarea", fullWidth: true, rows: 6,
+    },
+    {
+      name: "vorschlagRueckmeldung", label: "Vorschlag Rückmeldung",
+      type: "textarea-with-btn", fullWidth: true, rows: 5,
+      btnLabel: "Vorschlag generieren",
     },
   ],
   "fachtechnische-pruefung": [
@@ -745,6 +752,25 @@ function renderDetailScreen() {
       return;
     }
 
+    if (field.type === "textarea-with-btn") {
+      const label = document.createElement("label");
+      if (field.fullWidth) label.classList.add("full-width");
+      label.textContent = field.label;
+      const textarea = createFieldInput(step, { ...field, type: "textarea" });
+      label.htmlFor = textarea.id;
+      label.appendChild(textarea);
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "secondary-button generate-btn";
+      btn.innerHTML = GENERATE_BTN_INNER_HTML;
+      btn.addEventListener("click", () => generateVorschlagRueckmeldung(step, textarea, btn));
+      label.appendChild(btn);
+
+      detailForm.appendChild(label);
+      return;
+    }
+
     const label = document.createElement("label");
     if (field.fullWidth) label.classList.add("full-width");
     label.textContent = field.label;
@@ -794,6 +820,148 @@ function completeAndAdvanceDetailStep() {
 }
 
 // ─────────────────────────────────────────────────────────────────────
+// Sync KI analysis result into the "Ergebnis der formalen Prüfung" field
+// ─────────────────────────────────────────────────────────────────────
+function syncKiResultToFormalePruefungField(result) {
+  if (processSteps[currentDetailStepIndex].id !== "claimpruefung") return;
+  saveFieldValue("claimpruefung", "ergebnisFormalePruefung", result);
+  const el = document.getElementById("detail-claimpruefung-ergebnisFormalePruefung");
+  if (el) el.value = result;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Template-based Vorschlag Rückmeldung (fallback without AI config)
+// ─────────────────────────────────────────────────────────────────────
+function buildVorschlagTemplate(ergebnis) {
+  const ergebnisLower = ergebnis.toLowerCase();
+  const hasMaengel =
+    ergebnisLower.includes("mangel") ||
+    ergebnisLower.includes("fehlend") ||
+    ergebnisLower.includes("nicht vorhanden") ||
+    ergebnisLower.includes("fehlt") ||
+    ergebnisLower.includes("nachzureichen");
+
+  const intro =
+    "Sehr geehrte Damen und Herren,\n\n" +
+    "vielen Dank für die Einreichung Ihres Nachtragsangebots.\n\n" +
+    "Im Rahmen der formalen Prüfung Ihrer Unterlagen wurde folgendes festgestellt:\n\n" +
+    ergebnis +
+    "\n\n";
+
+  if (hasMaengel) {
+    return (
+      intro +
+      "Wir bitten Sie, die genannten fehlenden Unterlagen innerhalb von [X] Werktagen " +
+      "nachzureichen, damit die formale Prüfung abgeschlossen werden kann. " +
+      "Nach vollständigem Eingang aller Unterlagen werden wir die inhaltliche Prüfung aufnehmen " +
+      "und Sie über das Ergebnis informieren.\n\n" +
+      "Für Rückfragen stehen wir Ihnen gerne zur Verfügung.\n\n" +
+      "Mit freundlichen Grüßen\n[Claim Manager]"
+    );
+  }
+
+  return (
+    intro +
+    "Die formale Prüfung ist damit abgeschlossen. Wir werden nun mit der inhaltlichen Prüfung " +
+    "Ihres Antrags fortfahren und Sie über das weitere Vorgehen und Ergebnis informieren.\n\n" +
+    "Für Rückfragen stehen wir Ihnen gerne zur Verfügung.\n\n" +
+    "Mit freundlichen Grüßen\n[Claim Manager]"
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Generate "Vorschlag Rückmeldung" (button handler for claimpruefung)
+// ─────────────────────────────────────────────────────────────────────
+const GENERATE_BTN_INNER_HTML =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14">' +
+  '<path d="M12 2l2.09 6.26L20 10l-5.91 1.74L12 18l-2.09-6.26L4 10l5.91-1.74z"/>' +
+  "</svg> Vorschlag generieren";
+
+async function generateVorschlagRueckmeldung(step, vorschlagTextarea, btn) {
+  const ergebnis = getFieldValue(step.id, "ergebnisFormalePruefung", "").trim();
+
+  if (!ergebnis) {
+    alert(
+      "Bitte führen Sie zuerst die KI-Analyse durch oder tragen Sie ein Ergebnis der formalen Prüfung ein.",
+    );
+    return;
+  }
+
+  const { endpoint, deployment, apiVersion, apiKey } = aiConfigData;
+
+  if (!endpoint || !deployment || !apiVersion || !apiKey) {
+    const vorschlag = buildVorschlagTemplate(ergebnis);
+    vorschlagTextarea.value = vorschlag;
+    saveFieldValue(step.id, vorschlagTextarea.name, vorschlag);
+    return;
+  }
+
+  let normalizedEndpoint;
+  try {
+    normalizedEndpoint = new URL(endpoint).origin;
+  } catch {
+    vorschlagTextarea.value = "Ungültige Azure OpenAI Endpoint-URL.";
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Wird generiert …";
+
+  try {
+    const response = await fetch(
+      `${normalizedEndpoint}/openai/deployments/${encodeURIComponent(deployment)}/chat/completions?api-version=${encodeURIComponent(apiVersion)}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "api-key": apiKey },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: "system",
+              content:
+                "Du bist ein Assistent für Claim-Management im Bauwesen. " +
+                "Erstelle auf Basis des Ergebnisses der formalen Prüfung einen professionellen " +
+                "Vorschlag für eine Rückmeldung an den Claimsteller. " +
+                "Der Vorschlag soll höflich, klar und sachlich formuliert sein. " +
+                "Antworte auf Deutsch.",
+            },
+            {
+              role: "user",
+              content:
+                "Erstelle einen Vorschlag für eine Rückmeldung an den Claimsteller " +
+                "basierend auf folgendem Ergebnis der formalen Prüfung:\n\n" +
+                ergebnis,
+            },
+          ],
+          temperature: aiModelTemperature,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      vorschlagTextarea.value = `Azure OpenAI Fehler (${response.status}): ${errorText}`;
+      return;
+    }
+
+    const data = await response.json();
+    const content = data?.choices?.[0]?.message?.content;
+
+    if (typeof content === "string" && content.trim()) {
+      const vorschlag = content.trim();
+      vorschlagTextarea.value = vorschlag;
+      saveFieldValue(step.id, vorschlagTextarea.name, vorschlag);
+    } else {
+      vorschlagTextarea.value = "Keine verwertbare Ausgabe vom Modell erhalten.";
+    }
+  } catch (error) {
+    vorschlagTextarea.value = `Anfrage fehlgeschlagen: ${error instanceof Error ? error.message : "Unbekannter Fehler"}`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = GENERATE_BTN_INNER_HTML;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────
 // Azure OpenAI integration
 // ─────────────────────────────────────────────────────────────────────
 async function runAzureOpenAIDemo() {
@@ -805,13 +973,15 @@ async function runAzureOpenAIDemo() {
 
   if (!endpoint || !deployment || !apiVersion || !apiKey) {
     if (selectedStep.id === "claimpruefung") {
-      aiOutput.textContent =
+      const demoResult =
         "Formale Prüfung – Ergebnis der KI-Analyse:\n\n" +
         "Die Claim-Unterlagen wurden formal geprüft. Dabei wurden folgende Mängel festgestellt:\n\n" +
         "1. Fehlende Unterschrift: Das Nachtragsangebot (Seite 4) enthält keine rechtsverbindliche Unterschrift des Auftragnehmers. Bitte das unterzeichnete Dokument nachreichen.\n\n" +
         "2. Fehlendes referenziertes Dokument: Im Schriftsatz wird auf Anlage 3 \u2013 'Aufma\xDFprotokoll vom 15.03.2024' verwiesen. Dieses Dokument liegt in den eingereichten Unterlagen nicht vor und muss nachgereicht werden.\n\n" +
         "Die übrigen Pflichtfelder (Projektname, Datum, Beschreibung der Leistung) sind vollständig ausgefüllt. Nach Nachreichung der fehlenden Unterlagen kann die formale Prüfung als abgeschlossen betrachtet werden.";
+      aiOutput.textContent = demoResult;
       aiCopyButton.hidden = false;
+      syncKiResultToFormalePruefungField(demoResult);
     } else {
       aiOutput.textContent =
         "Bitte zunächst die Azure OpenAI Konfiguration über das Zahnrad-Symbol (oben rechts) einrichten.";
@@ -896,6 +1066,7 @@ async function runAzureOpenAIDemo() {
     if (typeof content === "string" && content.trim()) {
       aiOutput.textContent = content.trim();
       aiCopyButton.hidden = false;
+      syncKiResultToFormalePruefungField(content.trim());
     } else {
       aiOutput.textContent = "Keine verwertbare Ausgabe vom Modell erhalten.";
     }
