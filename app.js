@@ -760,10 +760,12 @@ function renderDetailScreen() {
       label.htmlFor = textarea.id;
       label.appendChild(textarea);
 
+      const btnLabel = field.btnLabel || "Generieren";
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "secondary-button generate-btn";
-      btn.innerHTML = GENERATE_BTN_INNER_HTML;
+      btn.dataset.btnLabel = btnLabel;
+      btn.innerHTML = GENERATE_BTN_SVG_ICON + btnLabel;
       btn.addEventListener("click", () => generateVorschlagRueckmeldung(step, textarea, btn));
       label.appendChild(btn);
 
@@ -822,10 +824,17 @@ function completeAndAdvanceDetailStep() {
 // ─────────────────────────────────────────────────────────────────────
 // Sync KI analysis result into the "Ergebnis der formalen Prüfung" field
 // ─────────────────────────────────────────────────────────────────────
+const ERGEBNIS_FORMALE_PRUEFUNG_FIELD = "ergebnisFormalePruefung";
+
+const GENERATE_BTN_SVG_ICON =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14">' +
+  '<path d="M12 2l2.09 6.26L20 10l-5.91 1.74L12 18l-2.09-6.26L4 10l5.91-1.74z"/>' +
+  "</svg> ";
+
 function syncKiResultToFormalePruefungField(result) {
   if (processSteps[currentDetailStepIndex].id !== "claimpruefung") return;
-  saveFieldValue("claimpruefung", "ergebnisFormalePruefung", result);
-  const el = document.getElementById("detail-claimpruefung-ergebnisFormalePruefung");
+  saveFieldValue("claimpruefung", ERGEBNIS_FORMALE_PRUEFUNG_FIELD, result);
+  const el = document.getElementById(`detail-claimpruefung-${ERGEBNIS_FORMALE_PRUEFUNG_FIELD}`);
   if (el) el.value = result;
 }
 
@@ -872,13 +881,8 @@ function buildVorschlagTemplate(ergebnis) {
 // ─────────────────────────────────────────────────────────────────────
 // Generate "Vorschlag Rückmeldung" (button handler for claimpruefung)
 // ─────────────────────────────────────────────────────────────────────
-const GENERATE_BTN_INNER_HTML =
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14">' +
-  '<path d="M12 2l2.09 6.26L20 10l-5.91 1.74L12 18l-2.09-6.26L4 10l5.91-1.74z"/>' +
-  "</svg> Vorschlag generieren";
-
 async function generateVorschlagRueckmeldung(step, vorschlagTextarea, btn) {
-  const ergebnis = getFieldValue(step.id, "ergebnisFormalePruefung", "").trim();
+  const ergebnis = getFieldValue(step.id, ERGEBNIS_FORMALE_PRUEFUNG_FIELD, "").trim();
 
   if (!ergebnis) {
     alert(
@@ -900,10 +904,13 @@ async function generateVorschlagRueckmeldung(step, vorschlagTextarea, btn) {
   try {
     normalizedEndpoint = new URL(endpoint).origin;
   } catch {
-    vorschlagTextarea.value = "Ungültige Azure OpenAI Endpoint-URL.";
+    const msg = "Ungültige Azure OpenAI Endpoint-URL.";
+    vorschlagTextarea.value = msg;
+    saveFieldValue(step.id, vorschlagTextarea.name, msg);
     return;
   }
 
+  const btnLabel = btn.dataset.btnLabel || "Generieren";
   btn.disabled = true;
   btn.textContent = "Wird generiert …";
 
@@ -939,7 +946,9 @@ async function generateVorschlagRueckmeldung(step, vorschlagTextarea, btn) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      vorschlagTextarea.value = `Azure OpenAI Fehler (${response.status}): ${errorText}`;
+      const msg = `Azure OpenAI Fehler (${response.status}): ${errorText}`;
+      vorschlagTextarea.value = msg;
+      saveFieldValue(step.id, vorschlagTextarea.name, msg);
       return;
     }
 
@@ -951,13 +960,17 @@ async function generateVorschlagRueckmeldung(step, vorschlagTextarea, btn) {
       vorschlagTextarea.value = vorschlag;
       saveFieldValue(step.id, vorschlagTextarea.name, vorschlag);
     } else {
-      vorschlagTextarea.value = "Keine verwertbare Ausgabe vom Modell erhalten.";
+      const msg = "Keine verwertbare Ausgabe vom Modell erhalten.";
+      vorschlagTextarea.value = msg;
+      saveFieldValue(step.id, vorschlagTextarea.name, msg);
     }
   } catch (error) {
-    vorschlagTextarea.value = `Anfrage fehlgeschlagen: ${error instanceof Error ? error.message : "Unbekannter Fehler"}`;
+    const msg = `Anfrage fehlgeschlagen: ${error instanceof Error ? error.message : "Unbekannter Fehler"}`;
+    vorschlagTextarea.value = msg;
+    saveFieldValue(step.id, vorschlagTextarea.name, msg);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = GENERATE_BTN_INNER_HTML;
+    btn.innerHTML = GENERATE_BTN_SVG_ICON + btnLabel;
   }
 }
 
