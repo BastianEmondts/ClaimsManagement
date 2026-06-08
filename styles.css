@@ -636,6 +636,13 @@ h1, h2, h3 { margin: 0; }
 
 .detail-checkbox.full-width { grid-column: 1 / -1; }
 
+.checkbox-row {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
 .detail-checkbox input[type="checkbox"] {
   width: 16px;
   height: 16px;
