@@ -869,8 +869,7 @@ function setCheckboxesFromAiResult(result) {
   const missingAttachments =
     (lower.includes("anhang") || lower.includes("anlage") || lower.includes("anhänge") ||
       lower.includes("dokument")) &&
-    (lower.includes("fehlend") || lower.includes("fehlt") ||
-      lower.includes("nicht vor") || lower.includes("nicht vorhanden"));
+    (lower.includes("fehlend") || lower.includes("fehlt") || lower.includes("nicht vorhanden"));
 
   const unterschriftValue = !missingSignature;
   const anhaengeValue = !missingAttachments;
