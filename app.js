@@ -23,6 +23,17 @@ const processSteps = [
     ],
   },
   {
+    id: "pruefung-dem-grunde",
+    title: "Prüfung dem Grunde nach",
+    type: "core",
+    details: [
+      "Prüfung dem Grunde nach: Hat der Lieferant einen zusätzlichen Vergütungsanspruch",
+      "Vertragliche Prüfung unter Einbeziehung und Bewertung der technischen Prüfung",
+    ],
+    role: ["Contract Manager", "Rechtliche Beratung"],
+    documents: ["Eingegangener Schriftsatz", "Nachtragsangebot", "Vertrag im Ganzen"],
+  },
+  {
     id: "fachtechnische-pruefung",
     title: "(Fach-) Technische Prüfung",
     type: "check",
@@ -54,17 +65,6 @@ const processSteps = [
     ],
     role: ["Kostenplaner/Controlling"],
     documents: ["GAEB-Datei", "Budgetübersichten"],
-  },
-  {
-    id: "pruefung-dem-grunde",
-    title: "Prüfung dem Grunde nach",
-    type: "core",
-    details: [
-      "Prüfung dem Grunde nach: Hat der Lieferant einen zusätzlichen Vergütungsanspruch",
-      "Vertragliche Prüfung unter Einbeziehung und Bewertung der technischen Prüfung",
-    ],
-    role: ["Contract Manager", "Rechtliche Beratung"],
-    documents: ["Eingegangener Schriftsatz", "Nachtragsangebot", "Vertrag im Ganzen"],
   },
   {
     id: "terminliche-pruefung",
